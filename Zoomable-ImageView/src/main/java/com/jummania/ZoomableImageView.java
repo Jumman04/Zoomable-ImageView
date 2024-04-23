@@ -69,6 +69,7 @@ import com.jummania.listener.OnGestureListener;
  */
 public class ZoomableImageView extends AppCompatImageView implements OnScaleGestureListener {
 
+
     /**
      * The minimum scale factor allowed for zooming.
      */
@@ -236,6 +237,7 @@ public class ZoomableImageView extends AppCompatImageView implements OnScaleGest
      */
     private boolean singleTapDetected = false;
 
+
     /**
      * Gesture listener for handling touch events such as double-tap and single-tap gestures.
      * This listener is used internally by {@link ZoomableImageView} to detect gestures.
@@ -306,6 +308,7 @@ public class ZoomableImageView extends AppCompatImageView implements OnScaleGest
         init(context, null);
     }
 
+
     /**
      * Custom ImageView that supports pinch-to-zoom functionality and smooth transformations.
      * This class extends {@link AppCompatImageView} and implements touch gestures for zooming and panning.
@@ -317,6 +320,7 @@ public class ZoomableImageView extends AppCompatImageView implements OnScaleGest
         super(context, attrs);
         init(context, attrs);
     }
+
 
     /**
      * Custom ImageView that supports pinch-to-zoom functionality and smooth transformations.
@@ -330,6 +334,7 @@ public class ZoomableImageView extends AppCompatImageView implements OnScaleGest
         super(context, attrs, defStyle);
         init(context, attrs);
     }
+
 
     /**
      * Initializes the ZoomableImageView with necessary settings and attributes.
@@ -440,6 +445,7 @@ public class ZoomableImageView extends AppCompatImageView implements OnScaleGest
         verifyScaleRange();
     }
 
+
     /**
      * Returns whether the image is translatable.
      *
@@ -448,6 +454,7 @@ public class ZoomableImageView extends AppCompatImageView implements OnScaleGest
     public boolean isTranslatable() {
         return translatable;
     }
+
 
     /**
      * Set the image's translatable state.
@@ -458,6 +465,7 @@ public class ZoomableImageView extends AppCompatImageView implements OnScaleGest
         this.translatable = translatable;
     }
 
+
     /**
      * Returns the zoomable state of the image.
      *
@@ -467,6 +475,7 @@ public class ZoomableImageView extends AppCompatImageView implements OnScaleGest
         return zoomable;
     }
 
+
     /**
      * Set the zoomable state of the image.
      *
@@ -475,6 +484,7 @@ public class ZoomableImageView extends AppCompatImageView implements OnScaleGest
     public void setZoomable(final boolean zoomable) {
         this.zoomable = zoomable;
     }
+
 
     /**
      * If restricted bounds are enabled, the image will not be allowed to translate
@@ -486,6 +496,7 @@ public class ZoomableImageView extends AppCompatImageView implements OnScaleGest
     public boolean getRestrictBounds() {
         return restrictBounds;
     }
+
 
     /**
      * Set the restrictBounds status of the image.
@@ -499,6 +510,7 @@ public class ZoomableImageView extends AppCompatImageView implements OnScaleGest
         this.restrictBounds = restrictBounds;
     }
 
+
     /**
      * Returns status of animateOnReset. This causes the image to smoothly animate back
      * to its start position when reset. Default value is true.
@@ -509,6 +521,7 @@ public class ZoomableImageView extends AppCompatImageView implements OnScaleGest
         return animateOnReset;
     }
 
+
     /**
      * Set whether or not the image should animate when resetting.
      *
@@ -517,6 +530,7 @@ public class ZoomableImageView extends AppCompatImageView implements OnScaleGest
     public void setAnimateOnReset(final boolean animateOnReset) {
         this.animateOnReset = animateOnReset;
     }
+
 
     /**
      * Get the current {@link AutoResetMode} mode of the image. Default value is {@link AutoResetMode#UNDER}.
@@ -529,6 +543,7 @@ public class ZoomableImageView extends AppCompatImageView implements OnScaleGest
         return autoResetMode;
     }
 
+
     /**
      * Set the {@link AutoResetMode} mode for the image.
      *
@@ -538,6 +553,7 @@ public class ZoomableImageView extends AppCompatImageView implements OnScaleGest
     public void setAutoResetMode(@AutoResetMode final int autoReset) {
         this.autoResetMode = autoReset;
     }
+
 
     /**
      * Whether or not the image should automatically center itself when it's dragged partially or
@@ -549,6 +565,7 @@ public class ZoomableImageView extends AppCompatImageView implements OnScaleGest
         return autoCenter;
     }
 
+
     /**
      * Set whether or not the image should automatically center itself when it's dragged
      * partially or fully out of view.
@@ -559,6 +576,7 @@ public class ZoomableImageView extends AppCompatImageView implements OnScaleGest
         this.autoCenter = autoCenter;
     }
 
+
     /**
      * Gets double tap to zoom state.
      *
@@ -567,6 +585,7 @@ public class ZoomableImageView extends AppCompatImageView implements OnScaleGest
     public boolean getDoubleTapToZoom() {
         return doubleTapToZoom;
     }
+
 
     /**
      * Sets double tap to zoom state.
@@ -577,6 +596,7 @@ public class ZoomableImageView extends AppCompatImageView implements OnScaleGest
         this.doubleTapToZoom = doubleTapToZoom;
     }
 
+
     /**
      * Gets the double tap to zoom scale factor.
      *
@@ -585,6 +605,7 @@ public class ZoomableImageView extends AppCompatImageView implements OnScaleGest
     public float getDoubleTapToZoomScaleFactor() {
         return doubleTapToZoomScaleFactor;
     }
+
 
     /**
      * Sets the double tap to zoom scale factor. Can be a maximum of max scale.
@@ -596,6 +617,7 @@ public class ZoomableImageView extends AppCompatImageView implements OnScaleGest
         verifyScaleRange();
     }
 
+
     /**
      * Get the current scale factor of the image, in relation to its starting size.
      *
@@ -604,6 +626,7 @@ public class ZoomableImageView extends AppCompatImageView implements OnScaleGest
     public float getCurrentScaleFactor() {
         return currentScaleFactor;
     }
+
 
     /**
      * Sets the scale type of this ImageView.
@@ -644,6 +667,7 @@ public class ZoomableImageView extends AppCompatImageView implements OnScaleGest
         }
     }
 
+
     /**
      * Sets the image resource for this ImageView and adjusts the scale type accordingly.
      * <p>
@@ -661,6 +685,7 @@ public class ZoomableImageView extends AppCompatImageView implements OnScaleGest
         // Reset the scale type to the initial value specified during view creation
         setScaleType(startScaleType);
     }
+
 
     /**
      * Sets the image drawable for this ImageView and adjusts the scale type accordingly.
@@ -698,6 +723,7 @@ public class ZoomableImageView extends AppCompatImageView implements OnScaleGest
         setScaleType(startScaleType);
     }
 
+
     /**
      * Sets the content of this ImageView to the specified URI.
      * <p>
@@ -727,6 +753,7 @@ public class ZoomableImageView extends AppCompatImageView implements OnScaleGest
         }
     }
 
+
     /**
      * Get the width of the displayed image.
      *
@@ -738,6 +765,7 @@ public class ZoomableImageView extends AppCompatImageView implements OnScaleGest
         else return 0;
     }
 
+
     /**
      * Get the height of the displayed image.
      *
@@ -748,6 +776,7 @@ public class ZoomableImageView extends AppCompatImageView implements OnScaleGest
             return getDrawable().getIntrinsicHeight() * matrixValues[Matrix.MSCALE_Y];
         else return 0;
     }
+
 
     /**
      * Records the initial transformation values of the image matrix for later use in resetting.
@@ -890,6 +919,7 @@ public class ZoomableImageView extends AppCompatImageView implements OnScaleGest
         return currentPointerCount > 1 || (currentScaleFactor > 1.0f && !isTranslatedToEdge) || isAnimating();
     }
 
+
     /**
      * Checks if the image is scrolled to the edge of the view bounds.
      * <p>
@@ -903,6 +933,7 @@ public class ZoomableImageView extends AppCompatImageView implements OnScaleGest
         return bounds.left == 0.0 || bounds.right == getWidth() || bounds.top == 0.0 || bounds.bottom == getHeight();
     }
 
+
     /**
      * Checks if translation (panning) is allowed based on the current configuration and scale factor.
      * <p>
@@ -915,6 +946,7 @@ public class ZoomableImageView extends AppCompatImageView implements OnScaleGest
         return translatable && currentScaleFactor > 1.0f;
     }
 
+
     /**
      * Checks if zooming is allowed based on the current configuration.
      * <p>
@@ -925,6 +957,7 @@ public class ZoomableImageView extends AppCompatImageView implements OnScaleGest
     protected boolean allowZoom() {
         return zoomable;
     }
+
 
     /**
      * Checks if an animation (reset animation) is currently running.
@@ -994,6 +1027,7 @@ public class ZoomableImageView extends AppCompatImageView implements OnScaleGest
         }
     }
 
+
     /**
      * Reset image back to its original size. Will snap back to original size
      * if animation on reset is disabled via {@link #setAnimateOnReset(boolean)}.
@@ -1001,6 +1035,7 @@ public class ZoomableImageView extends AppCompatImageView implements OnScaleGest
     public void reset() {
         reset(animateOnReset);
     }
+
 
     /**
      * Reset image back to its starting size. If {@code animate} is false, image
@@ -1016,12 +1051,14 @@ public class ZoomableImageView extends AppCompatImageView implements OnScaleGest
         }
     }
 
+
     /**
      * Animate the matrix back to its original position after the user stopped interacting with it.
      */
     private void animateToStartMatrix() {
         animateScaleAndTranslationToMatrix(startMatrix);
     }
+
 
     /**
      * Animates the scale and translation of the current matrix to the target matrix.
@@ -1248,6 +1285,7 @@ public class ZoomableImageView extends AppCompatImageView implements OnScaleGest
         return restrictedXDistance;
     }
 
+
     /**
      * Get the y distance to translate the current image.
      *
@@ -1272,6 +1310,7 @@ public class ZoomableImageView extends AppCompatImageView implements OnScaleGest
 
         return ydistance;
     }
+
 
     /**
      * Get the vertical distance to translate the current image, but restrict
@@ -1303,41 +1342,69 @@ public class ZoomableImageView extends AppCompatImageView implements OnScaleGest
         return restrictedYDistance;
     }
 
+
+    /**
+     * Handles the scaling gesture detected by {@link ScaleGestureDetector}.
+     *
+     * @param detector The {@link ScaleGestureDetector} instance detecting the scale gesture.
+     * @return {@code true} to consume the event, {@code false} otherwise.
+     */
     @Override
     public boolean onScale(ScaleGestureDetector detector) {
-
-        //calculate value we should scale by, ultimately the scale will be startScale*scaleFactor
+        // Calculate the value we should scale by, which will modify the current scale factor
         scaleBy = (startScale * detector.getScaleFactor()) / matrixValues[Matrix.MSCALE_X];
 
-        //what the scaling should end up at after the transformation
+        // Calculate the projected scale after applying the transformation
         final float projectedScale = scaleBy * matrixValues[Matrix.MSCALE_X];
 
-        //clamp to the min/max if it's going over
+        // Clamp the scale to the minimum and maximum scale limits if it's going beyond
         if (projectedScale < calculatedMinScale) {
             scaleBy = calculatedMinScale / matrixValues[Matrix.MSCALE_X];
         } else if (projectedScale > calculatedMaxScale) {
             scaleBy = calculatedMaxScale / matrixValues[Matrix.MSCALE_X];
         }
 
+        // Notify the gesture listener about zooming state changes
         if (onGestureListener != null) {
-            if (isZooming != scaleBy >= 1) {
-                isZooming = !isZooming;
+            boolean newZoomingState = scaleBy >= 1;
+            if (isZooming != newZoomingState) {
+                isZooming = newZoomingState;
                 onGestureListener.onZoomEvent(isZooming);
             }
         }
+
+        // Return false to indicate that the event is not consumed
         return false;
     }
 
+
+    /**
+     * Called when a scaling gesture begins.
+     *
+     * @param detector The {@link ScaleGestureDetector} instance detecting the scale gesture.
+     * @return {@code true} to continue detecting the scale gesture, {@code false} to ignore further events.
+     */
     @Override
     public boolean onScaleBegin(@NonNull ScaleGestureDetector detector) {
+        // Store the initial scale factor when the scaling gesture begins
         startScale = matrixValues[Matrix.MSCALE_X];
+
+        // Return true to continue detecting the scale gesture
         return true;
     }
 
+
+    /**
+     * Called when a scaling gesture ends.
+     *
+     * @param detector The {@link ScaleGestureDetector} instance detecting the scale gesture.
+     */
     @Override
     public void onScaleEnd(@NonNull ScaleGestureDetector detector) {
+        // Reset the scaleBy factor to 1 to prepare for the next scaling gesture
         scaleBy = 1f;
     }
+
 
     /**
      * Sets the listener for gesture events on the ZoomableImageView.
@@ -1352,5 +1419,6 @@ public class ZoomableImageView extends AppCompatImageView implements OnScaleGest
     public void setOnGestureListener(OnGestureListener onGestureListener) {
         this.onGestureListener = onGestureListener;
     }
+
 
 }
