@@ -363,7 +363,7 @@ public class ZoomableImageView extends AppCompatImageView implements OnScaleGest
                 translatable = values.getBoolean(R.styleable.ZoomableImageView_translatable, true);
                 animateOnReset = values.getBoolean(R.styleable.ZoomableImageView_animateOnReset, true);
                 autoCenter = values.getBoolean(R.styleable.ZoomableImageView_autoCenter, true);
-                restrictBounds = values.getBoolean(R.styleable.ZoomableImageView_restrictBounds, true);
+                restrictBounds = values.getBoolean(R.styleable.ZoomableImageView_restrictBounds, false);
                 doubleTapToZoom = values.getBoolean(R.styleable.ZoomableImageView_doubleTapToZoom, true);
 
                 // Read float attributes
@@ -381,7 +381,7 @@ public class ZoomableImageView extends AppCompatImageView implements OnScaleGest
             translatable = values.getBoolean(R.styleable.ZoomableImageView_translatable, true);
             animateOnReset = values.getBoolean(R.styleable.ZoomableImageView_animateOnReset, true);
             autoCenter = values.getBoolean(R.styleable.ZoomableImageView_autoCenter, true);
-            restrictBounds = values.getBoolean(R.styleable.ZoomableImageView_restrictBounds, true);
+            restrictBounds = values.getBoolean(R.styleable.ZoomableImageView_restrictBounds, false);
             doubleTapToZoom = values.getBoolean(R.styleable.ZoomableImageView_doubleTapToZoom, true);
             minScale = values.getFloat(R.styleable.ZoomableImageView_minScale, MIN_SCALE);
             maxScale = values.getFloat(R.styleable.ZoomableImageView_maxScale, MAX_SCALE);
@@ -915,8 +915,7 @@ public class ZoomableImageView extends AppCompatImageView implements OnScaleGest
      */
     protected boolean disallowParentTouch() {
         // Check conditions based on current touch state
-        boolean isTranslatedToEdge = restrictBounds && isScrollToEdge();
-        return currentPointerCount > 1 || (currentScaleFactor > 1.0f && !isTranslatedToEdge) || isAnimating();
+        return currentPointerCount > 1 || (currentScaleFactor > 1.0f && !isScrollToEdge()) || isAnimating();
     }
 
 
@@ -930,7 +929,7 @@ public class ZoomableImageView extends AppCompatImageView implements OnScaleGest
      */
     private boolean isScrollToEdge() {
         // Check if any edge of the image is aligned with the edge of the view
-        return bounds.left == 0.0 || bounds.right == getWidth() || bounds.top == 0.0 || bounds.bottom == getHeight();
+        return bounds.left >= 0.0 || bounds.right <= getWidth() || bounds.top >= 0.0 || bounds.bottom <= getHeight();
     }
 
 
