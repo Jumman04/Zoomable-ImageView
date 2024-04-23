@@ -21,4 +21,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "Zoomable ImageView"
 include(":app")
- 
+include(":Zoomable-ImageView")

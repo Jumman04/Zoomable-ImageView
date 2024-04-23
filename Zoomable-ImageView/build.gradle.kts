@@ -1,19 +1,17 @@
 plugins {
-    alias(libs.plugins.androidApplication)
+    alias(libs.plugins.androidLibrary)
+    id("maven-publish")
 }
 
 android {
-    namespace = "com.jummania.zoomableimageview"
+    namespace = "com.jummania"
     compileSdk = 34
 
     defaultConfig {
-        applicationId = "com.jummania.zoomableimageview"
         minSdk = 16
-        targetSdk = 34
-        versionCode = 1
-        versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        consumerProguardFiles("consumer-rules.pro")
     }
 
     buildTypes {
@@ -32,6 +30,19 @@ android {
 
 dependencies {
     implementation(libs.appcompat)
-    implementation(libs.material)
-    implementation(project(":Zoomable-ImageView"))
+}
+
+afterEvaluate {
+    publishing {
+        publications {
+            create<MavenPublication>("ReleaseAar") {
+                groupId = "com.github.Jumman04"
+                artifactId = "Zoomable-ImageView"
+                version = "1.0"
+                afterEvaluate {
+                    artifact(tasks.getByName("bundleReleaseAar"))
+                }
+            }
+        }
+    }
 }

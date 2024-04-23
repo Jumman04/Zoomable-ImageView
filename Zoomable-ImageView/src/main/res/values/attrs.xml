@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+
+    Copyright 2016 Jeffrey Sibbold
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+        http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License.
+
+-->
+<resources>
+
+    <!-- Defines custom attributes for configuring the ZoomableImageView -->
+    <declare-styleable name="ZoomableImageView">
+
+        <!--
+            Boolean attribute to enable/disable zooming functionality.
+            When set to true, users can zoom in/out on the image by pinching.
+            Default: true
+        -->
+        <attr name="zoomable" format="boolean" />
+
+        <!--
+            Boolean attribute to enable/disable image translation (panning).
+            When set to true, users can drag the image to move it within the view.
+            Default: true
+        -->
+        <attr name="translatable" format="boolean" />
+
+        <!--
+            Boolean attribute to restrict image translation to keep it within the visible bounds.
+            When set to true, the image will not move out of the visible area.
+            Default: true
+        -->
+        <attr name="restrictBounds" format="boolean" />
+
+        <!--
+            Boolean attribute to specify whether to animate the image reset operation.
+            When set to true, the image reset (returning to original state) is animated.
+            Default: true
+        -->
+        <attr name="animateOnReset" format="boolean" />
+
+        <!--
+            Boolean attribute to enable/disable double-tap-to-zoom functionality.
+            When set to true, double-tapping on the image will zoom it in/out.
+            Default: true
+        -->
+        <attr name="doubleTapToZoom" format="boolean" />
+
+        <!--
+            Float attribute defining the scale factor for double-tap-to-zoom functionality.
+            Determines how much the image zooms in/out when double-tapped.
+            Default: 3.0
+        -->
+        <attr name="doubleTapToZoomScaleFactor" format="float" />
+
+        <!--
+            Boolean attribute to specify whether the image should be automatically centered
+            after zooming or translating operations.
+            When set to true, the image will be centered automatically.
+            Default: true
+        -->
+        <attr name="autoCenter" format="boolean" />
+
+        <!--
+            Float attribute defining the minimum scale factor allowed for zooming the image.
+            Determines the lower limit of the image scale.
+            Default: 0.6
+        -->
+        <attr name="minScale" format="float" />
+
+        <!--
+            Float attribute defining the maximum scale factor allowed for zooming the image.
+            Determines the upper limit of the image scale.
+            Default: 8.0
+        -->
+        <attr name="maxScale" format="float" />
+
+        <!--
+            Enum attribute specifying the auto-reset mode for the image when interaction stops.
+            Possible values:
+            0 (UNDER): Reset the image if it's smaller than or equal to its starting size.
+            1 (OVER): Reset the image if it's larger than or equal to its starting size.
+            2 (ALWAYS): Always reset the image after interaction stops.
+            3 (NEVER): Never reset the image after interaction stops.
+            Default: UNDER
+        -->
+        <attr name="autoResetMode" format="enum">
+            <enum name="UNDER" value="0" />
+            <enum name="OVER" value="1" />
+            <enum name="ALWAYS" value="2" />
+            <enum name="NEVER" value="3" />
+        </attr>
+
+    </declare-styleable>
+</resources>
+
