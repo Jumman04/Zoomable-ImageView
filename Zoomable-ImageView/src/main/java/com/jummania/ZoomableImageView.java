@@ -18,9 +18,12 @@ package com.jummania;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.graphics.Bitmap;
 import android.graphics.Matrix;
 import android.graphics.PointF;
 import android.graphics.RectF;
+import android.graphics.drawable.Drawable;
+import android.net.Uri;
 import android.os.Build;
 import android.util.AttributeSet;
 import android.view.GestureDetector;
@@ -30,6 +33,7 @@ import android.view.ScaleGestureDetector.OnScaleGestureListener;
 import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.widget.AppCompatImageView;
 import androidx.core.view.ScaleGestureDetectorCompat;
 
@@ -212,6 +216,11 @@ public class ZoomableImageView extends AppCompatImageView implements OnScaleGest
     private GestureDetector gestureDetector;
 
     /**
+     * The initial scale type of the ImageView when zooming started.
+     */
+    private ScaleType startScaleType;
+
+    /**
      * Listener for handling gesture events.
      */
     private OnGestureListener onGestureListener = null;
@@ -342,6 +351,9 @@ public class ZoomableImageView extends AppCompatImageView implements OnScaleGest
 
         // Disable quick scaling to avoid conflicts with custom scaling behavior
         ScaleGestureDetectorCompat.setQuickScaleEnabled(scaleDetector, false);
+
+        // Store the initial scale type of the ImageView
+        startScaleType = getScaleType();
 
         // Read custom attributes from XML (if supported)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
@@ -613,6 +625,120 @@ public class ZoomableImageView extends AppCompatImageView implements OnScaleGest
      */
     public float getCurrentScaleFactor() {
         return currentScaleFactor;
+    }
+
+
+    /**
+     * Sets the scale type of this ImageView.
+     * <p>
+     * This method overrides the behavior of {@link ImageView#setScaleType(ScaleType)} to
+     * also update internal state variables used for zooming and resetting.
+     *
+     * @param scaleType The desired scale type to be set.
+     *                  If null, this method does nothing.
+     */
+    @Override
+    public void setScaleType(@Nullable ScaleType scaleType) {
+        if (scaleType != null) {
+            // Set the scale type using the parent ImageView method
+            super.setScaleType(scaleType);
+
+            // Update the initial scale type for reference
+            startScaleType = scaleType;
+
+            // Clear the initial scale values to prepare for recalibration
+            startValues = null;
+        }
+    }
+
+
+    /**
+     * Set enabled state of the view. Note that this will reset the image's
+     * {@link ScaleType} to its pre-zoom state.
+     *
+     * @param enabled enabled state
+     */
+    @Override
+    public void setEnabled(final boolean enabled) {
+        super.setEnabled(enabled);
+
+        if (!enabled) {
+            setScaleType(startScaleType);
+        }
+    }
+
+
+    /**
+     * Sets the image resource for this ImageView and adjusts the scale type accordingly.
+     * <p>
+     * This method overrides the behavior of {@link ImageView#setImageResource(int)}
+     * to set the image resource and reset the scale type to the initial value specified
+     * during view creation.
+     *
+     * @param resId The resource ID of the image to be set.
+     */
+    @Override
+    public void setImageResource(int resId) {
+        // Set the image resource using the parent ImageView method
+        super.setImageResource(resId);
+
+        // Reset the scale type to the initial value specified during view creation
+        setScaleType(startScaleType);
+    }
+
+
+    /**
+     * Sets the image drawable for this ImageView and adjusts the scale type accordingly.
+     * <p>
+     * This method overrides the behavior of {@link ImageView#setImageDrawable(Drawable)}
+     * to set the image drawable and reset the scale type to the initial value specified
+     * during view creation.
+     *
+     * @param drawable The drawable to be set as the image.
+     */
+    @Override
+    public void setImageDrawable(@Nullable Drawable drawable) {
+        // Set the image drawable using the parent ImageView method
+        super.setImageDrawable(drawable);
+
+        // Reset the scale type to the initial value specified during view creation
+        setScaleType(startScaleType);
+    }
+
+
+    /**
+     * Sets the content of this ImageView to the specified Bitmap.
+     * <p>
+     * This method overrides the behavior of {@link ImageView#setImageBitmap(Bitmap)} to
+     * also reset the scale type to the initial value ({@link #startScaleType}).
+     *
+     * @param bm The Bitmap to set as the content of this ImageView.
+     */
+    @Override
+    public void setImageBitmap(Bitmap bm) {
+        // Set the Bitmap content using the parent ImageView method
+        super.setImageBitmap(bm);
+
+        // Reset the scale type to the initial value
+        setScaleType(startScaleType);
+    }
+
+
+    /**
+     * Sets the content of this ImageView to the specified URI.
+     * <p>
+     * This method overrides the behavior of {@link ImageView#setImageURI(Uri)} to
+     * also reset the scale type to the initial value ({@link #startScaleType}).
+     *
+     * @param uri The URI of the image to set as the content of this ImageView.
+     */
+    @Override
+    public void setImageURI(@Nullable Uri uri) {
+        // Set the image URI using the parent ImageView method
+        super.setImageURI(uri);
+
+        // Reset the scale type to the initial value
+        setScaleType(startScaleType);
     }
 
 
