@@ -18,12 +18,9 @@ package com.jummania;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.res.TypedArray;
-import android.graphics.Bitmap;
 import android.graphics.Matrix;
 import android.graphics.PointF;
 import android.graphics.RectF;
-import android.graphics.drawable.Drawable;
-import android.net.Uri;
 import android.os.Build;
 import android.util.AttributeSet;
 import android.view.GestureDetector;
@@ -33,11 +30,11 @@ import android.view.ScaleGestureDetector.OnScaleGestureListener;
 import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.widget.AppCompatImageView;
 import androidx.core.view.ScaleGestureDetectorCompat;
 
 import com.jummania.listener.AnimatorListener;
+import com.jummania.listener.OnBoundsChangeListener;
 import com.jummania.listener.OnGestureListener;
 
 /**
@@ -99,11 +96,6 @@ public class ZoomableImageView extends AppCompatImageView implements OnScaleGest
      * Last touch point coordinates.
      */
     private final PointF last = new PointF(0, 0);
-
-    /**
-     * The initial scale type of the ImageView when zooming started.
-     */
-    private ScaleType startScaleType;
 
     /**
      * The initial transformation matrix when zooming started.
@@ -221,6 +213,8 @@ public class ZoomableImageView extends AppCompatImageView implements OnScaleGest
      * Listener for handling gesture events.
      */
     private OnGestureListener onGestureListener = null;
+
+    private OnBoundsChangeListener boundsChangeListener = null;
 
     /**
      * Flag indicating whether a double-tap gesture has been detected.
@@ -346,9 +340,6 @@ public class ZoomableImageView extends AppCompatImageView implements OnScaleGest
 
         // Disable quick scaling to avoid conflicts with custom scaling behavior
         ScaleGestureDetectorCompat.setQuickScaleEnabled(scaleDetector, false);
-
-        // Store the initial scale type of the ImageView
-        startScaleType = getScaleType();
 
         // Read custom attributes from XML (if supported)
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
@@ -624,120 +615,6 @@ public class ZoomableImageView extends AppCompatImageView implements OnScaleGest
 
 
     /**
-     * Sets the scale type of this ImageView.
-     * <p>
-     * This method overrides the behavior of {@link ImageView#setScaleType(ScaleType)} to
-     * also update internal state variables used for zooming and resetting.
-     *
-     * @param scaleType The desired scale type to be set.
-     *                  If null, this method does nothing.
-     */
-    @Override
-    public void setScaleType(@Nullable ScaleType scaleType) {
-        if (scaleType != null) {
-            // Set the scale type using the parent ImageView method
-            super.setScaleType(scaleType);
-
-            // Update the initial scale type for reference
-            startScaleType = scaleType;
-
-            // Clear the initial scale values to prepare for recalibration
-            startValues = null;
-        }
-    }
-
-
-    /**
-     * Set enabled state of the view. Note that this will reset the image's
-     * {@link ScaleType} to its pre-zoom state.
-     *
-     * @param enabled enabled state
-     */
-    @Override
-    public void setEnabled(final boolean enabled) {
-        super.setEnabled(enabled);
-
-        if (!enabled) {
-            setScaleType(startScaleType);
-        }
-    }
-
-
-    /**
-     * Sets the image resource for this ImageView and adjusts the scale type accordingly.
-     * <p>
-     * This method overrides the behavior of {@link ImageView#setImageResource(int)}
-     * to set the image resource and reset the scale type to the initial value specified
-     * during view creation.
-     *
-     * @param resId The resource ID of the image to be set.
-     */
-    @Override
-    public void setImageResource(int resId) {
-        // Set the image resource using the parent ImageView method
-        super.setImageResource(resId);
-
-        // Reset the scale type to the initial value specified during view creation
-        setScaleType(startScaleType);
-    }
-
-
-    /**
-     * Sets the image drawable for this ImageView and adjusts the scale type accordingly.
-     * <p>
-     * This method overrides the behavior of {@link ImageView#setImageDrawable(Drawable)}
-     * to set the image drawable and reset the scale type to the initial value specified
-     * during view creation.
-     *
-     * @param drawable The drawable to be set as the image.
-     */
-    @Override
-    public void setImageDrawable(@Nullable Drawable drawable) {
-        // Set the image drawable using the parent ImageView method
-        super.setImageDrawable(drawable);
-
-        // Reset the scale type to the initial value specified during view creation
-        setScaleType(startScaleType);
-    }
-
-
-    /**
-     * Sets the content of this ImageView to the specified Bitmap.
-     * <p>
-     * This method overrides the behavior of {@link ImageView#setImageBitmap(Bitmap)} to
-     * also reset the scale type to the initial value ({@link #startScaleType}).
-     *
-     * @param bm The Bitmap to set as the content of this ImageView.
-     */
-    @Override
-    public void setImageBitmap(Bitmap bm) {
-        // Set the Bitmap content using the parent ImageView method
-        super.setImageBitmap(bm);
-
-        // Reset the scale type to the initial value
-        setScaleType(startScaleType);
-    }
-
-
-    /**
-     * Sets the content of this ImageView to the specified URI.
-     * <p>
-     * This method overrides the behavior of {@link ImageView#setImageURI(Uri)} to
-     * also reset the scale type to the initial value ({@link #startScaleType}).
-     *
-     * @param uri The URI of the image to set as the content of this ImageView.
-     */
-    @Override
-    public void setImageURI(@Nullable Uri uri) {
-        // Set the image URI using the parent ImageView method
-        super.setImageURI(uri);
-
-        // Reset the scale type to the initial value
-        setScaleType(startScaleType);
-    }
-
-
-    /**
      * Update the bounds of the displayed image based on the current matrix.
      *
      * @param values the image's current matrix values.
@@ -812,10 +689,9 @@ public class ZoomableImageView extends AppCompatImageView implements OnScaleGest
     public boolean onTouchEvent(MotionEvent event) {
         // Check if the view is clickable and enabled, and if zooming or translation is allowed
         if (!isClickable() && isEnabled() && (zoomable || translatable)) {
+
             // Ensure the scale type is set to MATRIX for custom transformations
-            if (getScaleType() != ScaleType.MATRIX) {
-                super.setScaleType(ScaleType.MATRIX);
-            }
+            if (getScaleType() != ScaleType.MATRIX) super.setScaleType(ScaleType.MATRIX);
 
             // Capture and initialize start values if not already set
             if (startValues == null) {
@@ -923,16 +799,71 @@ public class ZoomableImageView extends AppCompatImageView implements OnScaleGest
 
 
     /**
-     * Checks if the image is scrolled to the edge of the view bounds.
+     * Checks if the image bounds are aligned with or exceed the view edges.
      * <p>
-     * This method evaluates whether the current image position is at the edge of the visible
-     * bounds (left, right, top, or bottom) of the ZoomableImageView.
+     * This method evaluates whether any edge of the current image bounds (left, right, top, or bottom)
+     * is aligned with or exceeds the visible edges of the ZoomableImageView.
      *
-     * @return True if the image is scrolled to the edge, false otherwise.
+     * @return True if any edge of the image bounds is aligned with or exceeds the view edges, false otherwise.
      */
     private boolean isScrollToEdge() {
+        float screenWidth = getWidth();
+        float screenHeight = getHeight();
+
+        // Determine alignment of image bounds relative to view edges
+        boolean leftAligned = bounds.left >= 0.0f;
+        boolean rightAligned = bounds.right <= screenWidth;
+        boolean topAligned = bounds.top >= 0.0f;
+        boolean bottomAligned = bounds.bottom <= screenHeight;
+
+        if (boundsChangeListener != null) {
+            // Calculate off-screen percentages for each aligned edge
+            float imageWidth = bounds.right - bounds.left;
+            float imageHeight = bounds.bottom - bounds.top;
+
+            float leftAlignedPercentage = leftAligned ? calculatePercentageOffScreen(bounds.left, imageWidth, screenWidth) : 0;
+            float rightAlignedPercentage = rightAligned ? calculatePercentageOffScreen(bounds.right, imageWidth, screenWidth) : 0;
+            float topAlignedPercentage = topAligned ? calculatePercentageOffScreen(bounds.top, imageHeight, screenHeight) : 0;
+            float bottomAlignedPercentage = bottomAligned ? calculatePercentageOffScreen(bounds.bottom, imageHeight, screenHeight) : 0;
+
+            // Determine the maximum off-screen percentage and corresponding alignment
+            float offScreenPercentage = Math.max(Math.max(leftAlignedPercentage, rightAlignedPercentage), Math.max(topAlignedPercentage, bottomAlignedPercentage));
+
+            Alignment alignment;
+            if (offScreenPercentage == leftAlignedPercentage) {
+                alignment = Alignment.LEFT;
+            } else if (offScreenPercentage == rightAlignedPercentage) {
+                alignment = Alignment.RIGHT;
+            } else if (offScreenPercentage == topAlignedPercentage) {
+                alignment = Alignment.TOP;
+            } else {
+                alignment = Alignment.BOTTOM;
+            }
+
+            // Notify listener of alignment changes and distance updates
+            boundsChangeListener.onBoundAlignmentChanged(alignment, offScreenPercentage);
+            boundsChangeListener.onBoundDistanceChanged(bounds.left, screenWidth - bounds.right, bounds.top, screenHeight - bounds.bottom);
+        }
+
         // Check if any edge of the image is aligned with the edge of the view
-        return bounds.left >= 0.0 || bounds.right <= getWidth() || bounds.top >= 0.0 || bounds.bottom <= getHeight();
+        return leftAligned || rightAligned || topAligned || bottomAligned;
+    }
+
+
+    /**
+     * Calculates the percentage by which a coordinate is off-screen relative to the image size and screen size.
+     *
+     * @param coordinate The coordinate position of an image edge (left, right, top, or bottom).
+     * @param imageSize  The size of the image along the corresponding dimension (width or height).
+     * @param screenSize The size of the screen along the corresponding dimension (width or height).
+     * @return The percentage by which the coordinate is off-screen, relative to the image size.
+     */
+    private float calculatePercentageOffScreen(float coordinate, float imageSize, float screenSize) {
+        // Calculate the absolute distance off the screen
+        float distanceOffScreen = Math.max(0, imageSize - screenSize + coordinate);
+
+        // Calculate the percentage relative to the image size
+        return (distanceOffScreen / imageSize) * 100;
     }
 
 
@@ -1376,8 +1307,7 @@ public class ZoomableImageView extends AppCompatImageView implements OnScaleGest
             // Determine if the zooming gesture is active and provide current scale information
             // isZooming: Indicates if the image is currently zoomed in (scaleBy >= 1)
             // currentScaleFactor: Current scale factor of the image
-            boolean isZooming = scaleBy >= 1 && currentScaleFactor != minScale;
-            onGestureListener.onZoomEvent(isZooming, currentScaleFactor);
+            onGestureListener.onZoomEvent(scaleBy >= 1 && currentScaleFactor != minScale, currentScaleFactor);
         }
 
 
@@ -1429,4 +1359,7 @@ public class ZoomableImageView extends AppCompatImageView implements OnScaleGest
     }
 
 
+    public void setBoundsChangeListener(OnBoundsChangeListener boundsChangeListener) {
+        this.boundsChangeListener = boundsChangeListener;
+    }
 }

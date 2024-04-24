@@ -9,7 +9,9 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
+import com.jummania.Alignment;
 import com.jummania.ZoomableImageView;
+import com.jummania.listener.OnBoundsChangeListener;
 import com.jummania.listener.OnGestureListener;
 
 public class MainActivity extends AppCompatActivity {
@@ -45,6 +47,18 @@ public class MainActivity extends AppCompatActivity {
             public void onZoomEvent(boolean isZooming, float currentScaleFactor) {
                 // Handle the onZoomEvent
                 Log.d("OnGestureListener", "isZooming: " + isZooming + ", currentScaleFactor: " + currentScaleFactor);
+            }
+        });
+
+        zoomableImageView.setBoundsChangeListener(new OnBoundsChangeListener() {
+            @Override
+            public void onBoundAlignmentChanged(Alignment alignment, float offScreenPercentage) {
+                Log.d("OnBoundsChangeListener", "Alignment: " + alignment + ", offScreenPercentage: " + offScreenPercentage);
+            }
+
+            @Override
+            public void onBoundDistanceChanged(float leftDistance, float rightDistance, float topDistance, float bottomDistance) {
+                Log.d("OnBoundsChangeListener", "leftDistance: " + leftDistance);
             }
         });
 
