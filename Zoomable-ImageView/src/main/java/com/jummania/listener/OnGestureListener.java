@@ -9,12 +9,14 @@ package com.jummania.listener;
  */
 public interface OnGestureListener {
 
+
     /**
      * Called when a double tap gesture event occurs.
      */
     default void onDoubleTapEvent() {
         // Default empty implementation
     }
+
 
     /**
      * Called when a single tap gesture event occurs.
@@ -23,13 +25,16 @@ public interface OnGestureListener {
         // Default empty implementation
     }
 
+
     /**
      * Called when a zoom gesture event occurs.
      *
-     * @param isZooming true if the zooming gesture is ongoing, false otherwise.
+     * @param isZooming          true if the zooming gesture is ongoing, false otherwise.
+     * @param currentScaleFactor the current scale factor applied to the view.
      */
-    default void onZoomEvent(boolean isZooming) {
+    default void onZoomEvent(boolean isZooming, float currentScaleFactor) {
         // Default empty implementation
     }
+
 
 }

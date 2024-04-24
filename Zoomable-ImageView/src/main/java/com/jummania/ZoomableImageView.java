@@ -101,11 +101,6 @@ public class ZoomableImageView extends AppCompatImageView implements OnScaleGest
     private final PointF last = new PointF(0, 0);
 
     /**
-     * Flag indicating whether the image is currently being zoomed.
-     */
-    private boolean isZooming = false;
-
-    /**
      * The initial scale type of the ImageView when zooming started.
      */
     private ScaleType startScaleType;
@@ -853,6 +848,14 @@ public class ZoomableImageView extends AppCompatImageView implements OnScaleGest
                     Matrix zoomMatrix = new Matrix(matrix);
                     zoomMatrix.postScale(doubleTapToZoomScaleFactor, doubleTapToZoomScaleFactor, scaleDetector.getFocusX(), scaleDetector.getFocusY());
                     animateScaleAndTranslationToMatrix(zoomMatrix);
+
+                    // Notify the gesture listener of a zoom event
+                    if (onGestureListener != null) {
+                        // The 'true' parameter indicates that a zooming gesture is ongoing
+                        // 'doubleTapToZoomScaleFactor' represents the current scale factor applied during zooming
+                        onGestureListener.onZoomEvent(true, doubleTapToZoomScaleFactor);
+                    }
+
                 }
                 return true;
             } else if (!singleTapDetected) {
@@ -861,25 +864,25 @@ public class ZoomableImageView extends AppCompatImageView implements OnScaleGest
                     // Reset the starting touch point for translation
                     last.set(scaleDetector.getFocusX(), scaleDetector.getFocusY());
                 } else if (event.getActionMasked() == MotionEvent.ACTION_MOVE) {
-                    final float focusx = scaleDetector.getFocusX();
-                    final float focusy = scaleDetector.getFocusY();
+                    final float focusX = scaleDetector.getFocusX();
+                    final float focusY = scaleDetector.getFocusY();
 
                     // Apply translation if allowed
                     if (allowTranslate()) {
-                        float xdistance = getXDistance(focusx, last.x);
-                        float ydistance = getYDistance(focusy, last.y);
-                        matrix.postTranslate(xdistance, ydistance);
+                        float xDistance = getXDistance(focusX, last.x);
+                        float yDistance = getYDistance(focusY, last.y);
+                        matrix.postTranslate(xDistance, yDistance);
                     }
 
                     // Apply zoom (scaling) if allowed
                     if (allowZoom()) {
-                        matrix.postScale(scaleBy, scaleBy, focusx, focusy);
+                        matrix.postScale(scaleBy, scaleBy, focusX, focusY);
                         currentScaleFactor = matrixValues[Matrix.MSCALE_X] / startValues[Matrix.MSCALE_X];
                     }
 
                     // Update the image matrix and record the last touch point
                     setImageMatrix(matrix);
-                    last.set(focusx, focusy);
+                    last.set(focusX, focusY);
                 }
 
                 // Reset scaling factor and image state on touch up or cancel
@@ -1028,11 +1031,21 @@ public class ZoomableImageView extends AppCompatImageView implements OnScaleGest
 
 
     /**
-     * Reset image back to its original size. Will snap back to original size
-     * if animation on reset is disabled via {@link #setAnimateOnReset(boolean)}.
+     * Resets the image back to its original size. If animation on reset is enabled
+     * (controlled by {@link #setAnimateOnReset(boolean)}), the reset operation will
+     * animate the image back to its original size; otherwise, it will snap back
+     * instantly.
+     * <p>
+     * After resetting, this method notifies the gesture listener that the zooming
+     * gesture has ended and the image is restored to the default scale of 1.
      */
     public void reset() {
         reset(animateOnReset);
+
+        // Notify gesture listener of the end of zooming (isZooming = false) and restore to default scale (1)
+        if (onGestureListener != null) {
+            onGestureListener.onZoomEvent(false, 1);
+        }
     }
 
 
@@ -1078,15 +1091,10 @@ public class ZoomableImageView extends AppCompatImageView implements OnScaleGest
         beginMatrix.getValues(matrixValues);
 
         // Calculate differences between current and target matrix values
-        final float xsdiff = targetValues[Matrix.MSCALE_X] - matrixValues[Matrix.MSCALE_X];
-        final float ysdiff = targetValues[Matrix.MSCALE_Y] - matrixValues[Matrix.MSCALE_Y];
-        final float xtdiff = targetValues[Matrix.MTRANS_X] - matrixValues[Matrix.MTRANS_X];
-        final float ytdiff = targetValues[Matrix.MTRANS_Y] - matrixValues[Matrix.MTRANS_Y];
-
-        // Notify gesture listener of zoom event direction based on xsdiff
-        if (onGestureListener != null) {
-            onGestureListener.onZoomEvent(xsdiff > 0);
-        }
+        final float xSDiff = targetValues[Matrix.MSCALE_X] - matrixValues[Matrix.MSCALE_X];
+        final float ySDiff = targetValues[Matrix.MSCALE_Y] - matrixValues[Matrix.MSCALE_Y];
+        final float xTDiff = targetValues[Matrix.MTRANS_X] - matrixValues[Matrix.MTRANS_X];
+        final float yTDiff = targetValues[Matrix.MTRANS_Y] - matrixValues[Matrix.MTRANS_Y];
 
         // Create a ValueAnimator to interpolate between start and end matrix values
         resetAnimator = ValueAnimator.ofFloat(0, 1f);
@@ -1100,10 +1108,10 @@ public class ZoomableImageView extends AppCompatImageView implements OnScaleGest
                 activeMatrix.set(beginMatrix);
                 activeMatrix.getValues(values);
                 // Interpolate matrix values based on animation progress
-                values[Matrix.MTRANS_X] = values[Matrix.MTRANS_X] + xtdiff * val;
-                values[Matrix.MTRANS_Y] = values[Matrix.MTRANS_Y] + ytdiff * val;
-                values[Matrix.MSCALE_X] = values[Matrix.MSCALE_X] + xsdiff * val;
-                values[Matrix.MSCALE_Y] = values[Matrix.MSCALE_Y] + ysdiff * val;
+                values[Matrix.MTRANS_X] = values[Matrix.MTRANS_X] + xTDiff * val;
+                values[Matrix.MTRANS_Y] = values[Matrix.MTRANS_Y] + yTDiff * val;
+                values[Matrix.MSCALE_X] = values[Matrix.MSCALE_X] + xSDiff * val;
+                values[Matrix.MSCALE_Y] = values[Matrix.MSCALE_Y] + ySDiff * val;
                 activeMatrix.setValues(values);
                 setImageMatrix(activeMatrix); // Apply interpolated matrix to the ImageView
             }
@@ -1236,21 +1244,21 @@ public class ZoomableImageView extends AppCompatImageView implements OnScaleGest
      * If bounds restriction is enabled, the translation is restricted to keep the image on screen.
      */
     private float getXDistance(final float toX, final float fromX) {
-        float xdistance = toX - fromX;
+        float distance = toX - fromX;
 
         // Restrict the x distance based on bounds to keep the image on screen
         if (restrictBounds) {
-            xdistance = getRestrictedXDistance(xdistance);
+            distance = getRestrictedXDistance(distance);
         }
 
         // Prevent the image from translating too far offscreen
-        if (bounds.right + xdistance < 0) {
-            xdistance = -bounds.right; // Align with the left edge of the screen
-        } else if (bounds.left + xdistance > getWidth()) {
-            xdistance = getWidth() - bounds.left; // Align with the right edge of the screen
+        if (bounds.right + distance < 0) {
+            distance = -bounds.right; // Align with the left edge of the screen
+        } else if (bounds.left + distance > getWidth()) {
+            distance = getWidth() - bounds.left; // Align with the right edge of the screen
         }
 
-        return xdistance;
+        return distance;
     }
 
 
@@ -1261,22 +1269,22 @@ public class ZoomableImageView extends AppCompatImageView implements OnScaleGest
      * If it is larger, prevent its edges from translating farther inward
      * from the outer edge.
      *
-     * @param xdistance the current desired horizontal distance to translate
+     * @param distance the current desired horizontal distance to translate
      * @return the actual horizontal distance to translate with bounds restrictions
      */
-    private float getRestrictedXDistance(final float xdistance) {
-        float restrictedXDistance = xdistance;
+    private float getRestrictedXDistance(final float distance) {
+        float restrictedXDistance = distance;
 
         if (getCurrentDisplayedWidth() >= getWidth()) {
-            if (bounds.left <= 0 && bounds.left + xdistance > 0 && !scaleDetector.isInProgress()) {
+            if (bounds.left <= 0 && bounds.left + distance > 0 && !scaleDetector.isInProgress()) {
                 restrictedXDistance = -bounds.left;
-            } else if (bounds.right >= getWidth() && bounds.right + xdistance < getWidth() && !scaleDetector.isInProgress()) {
+            } else if (bounds.right >= getWidth() && bounds.right + distance < getWidth() && !scaleDetector.isInProgress()) {
                 restrictedXDistance = getWidth() - bounds.right;
             }
         } else if (!scaleDetector.isInProgress()) {
-            if (bounds.left >= 0 && bounds.left + xdistance < 0) {
+            if (bounds.left >= 0 && bounds.left + distance < 0) {
                 restrictedXDistance = -bounds.left;
-            } else if (bounds.right <= getWidth() && bounds.right + xdistance > getWidth()) {
+            } else if (bounds.right <= getWidth() && bounds.right + distance > getWidth()) {
                 restrictedXDistance = getWidth() - bounds.right;
             }
         }
@@ -1294,20 +1302,20 @@ public class ZoomableImageView extends AppCompatImageView implements OnScaleGest
      * will restrict the translation to keep the image on screen.
      */
     private float getYDistance(final float toY, final float fromY) {
-        float ydistance = toY - fromY;
+        float distance = toY - fromY;
 
         if (restrictBounds) {
-            ydistance = getRestrictedYDistance(ydistance);
+            distance = getRestrictedYDistance(distance);
         }
 
         //prevents image from translating an infinite distance offscreen
-        if (bounds.bottom + ydistance < 0) {
-            ydistance = -bounds.bottom;
-        } else if (bounds.top + ydistance > getHeight()) {
-            ydistance = getHeight() - bounds.top;
+        if (bounds.bottom + distance < 0) {
+            distance = -bounds.bottom;
+        } else if (bounds.top + distance > getHeight()) {
+            distance = getHeight() - bounds.top;
         }
 
-        return ydistance;
+        return distance;
     }
 
 
@@ -1318,22 +1326,22 @@ public class ZoomableImageView extends AppCompatImageView implements OnScaleGest
      * If it is larger, prevent its edges from translating farther inward
      * from the outer edge.
      *
-     * @param ydistance the current desired vertical distance to translate
+     * @param distance the current desired vertical distance to translate
      * @return the actual vertical distance to translate with bounds restrictions
      */
-    private float getRestrictedYDistance(final float ydistance) {
-        float restrictedYDistance = ydistance;
+    private float getRestrictedYDistance(final float distance) {
+        float restrictedYDistance = distance;
 
         if (getCurrentDisplayedHeight() >= getHeight()) {
-            if (bounds.top <= 0 && bounds.top + ydistance > 0 && !scaleDetector.isInProgress()) {
+            if (bounds.top <= 0 && bounds.top + distance > 0 && !scaleDetector.isInProgress()) {
                 restrictedYDistance = -bounds.top;
-            } else if (bounds.bottom >= getHeight() && bounds.bottom + ydistance < getHeight() && !scaleDetector.isInProgress()) {
+            } else if (bounds.bottom >= getHeight() && bounds.bottom + distance < getHeight() && !scaleDetector.isInProgress()) {
                 restrictedYDistance = getHeight() - bounds.bottom;
             }
         } else if (!scaleDetector.isInProgress()) {
-            if (bounds.top >= 0 && bounds.top + ydistance < 0) {
+            if (bounds.top >= 0 && bounds.top + distance < 0) {
                 restrictedYDistance = -bounds.top;
-            } else if (bounds.bottom <= getHeight() && bounds.bottom + ydistance > getHeight()) {
+            } else if (bounds.bottom <= getHeight() && bounds.bottom + distance > getHeight()) {
                 restrictedYDistance = getHeight() - bounds.bottom;
             }
         }
@@ -1363,14 +1371,15 @@ public class ZoomableImageView extends AppCompatImageView implements OnScaleGest
             scaleBy = calculatedMaxScale / matrixValues[Matrix.MSCALE_X];
         }
 
-        // Notify the gesture listener about zooming state changes
+        // Notify the gesture listener about zooming state changes based on scale factors
         if (onGestureListener != null) {
-            boolean newZoomingState = scaleBy >= 1;
-            if (isZooming != newZoomingState) {
-                isZooming = newZoomingState;
-                onGestureListener.onZoomEvent(isZooming);
-            }
+            // Determine if the zooming gesture is active and provide current scale information
+            // isZooming: Indicates if the image is currently zoomed in (scaleBy >= 1)
+            // currentScaleFactor: Current scale factor of the image
+            boolean isZooming = scaleBy >= 1 && currentScaleFactor != minScale;
+            onGestureListener.onZoomEvent(isZooming, currentScaleFactor);
         }
+
 
         // Return false to indicate that the event is not consumed
         return false;

@@ -32,19 +32,19 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onDoubleTapEvent() {
                 // Handle the onDoubleTapEvent
-                Log.d(getClass().getSimpleName(), "onDoubleTapEvent");
+                Log.d("OnGestureListener", "onDoubleTapEvent");
             }
 
             @Override
             public void onSingleTapEvent() {
                 // Handle the onSingleTapEvent
-                Log.d(getClass().getSimpleName(), "onSingleTapEvent");
+                Log.d("OnGestureListener", "onSingleTapEvent");
             }
 
             @Override
-            public void onZoomEvent(boolean isZooming) {
+            public void onZoomEvent(boolean isZooming, float currentScaleFactor) {
                 // Handle the onZoomEvent
-                Log.d(getClass().getSimpleName(), "onZoomEvent: "+isZooming);
+                Log.d("OnGestureListener", "isZooming: " + isZooming + ", currentScaleFactor: " + currentScaleFactor);
             }
         });
 
