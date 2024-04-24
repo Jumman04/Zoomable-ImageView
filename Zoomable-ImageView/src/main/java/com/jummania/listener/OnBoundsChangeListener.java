@@ -1,5 +1,7 @@
 package com.jummania.listener;
 
+import androidx.annotation.NonNull;
+
 import com.jummania.enums.Alignment;
 
 /**
@@ -18,6 +20,6 @@ public interface OnBoundsChangeListener {
      * @param alignment           the alignment of the image bounds exceeding the view edges (LEFT, RIGHT, TOP, BOTTOM).
      * @param offScreenPercentage the percentage of the image off-screen relative to the corresponding edge.
      */
-    void onBoundAlignmentChanged(Alignment alignment, float offScreenPercentage);
+    void onBoundAlignmentChanged(@NonNull Alignment alignment, float offScreenPercentage);
 
 }

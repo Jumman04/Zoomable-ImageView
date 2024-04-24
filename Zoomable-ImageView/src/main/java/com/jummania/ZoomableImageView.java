@@ -1387,7 +1387,13 @@ public class ZoomableImageView extends AppCompatImageView implements OnScaleGest
     }
 
 
+    /**
+     * Sets a listener to receive callbacks when the image bounds change alignment or distance relative to the view edges.
+     *
+     * @param boundsChangeListener The listener to set, implementing the {@link OnBoundsChangeListener} interface.
+     */
     public void setBoundsChangeListener(OnBoundsChangeListener boundsChangeListener) {
         this.boundsChangeListener = boundsChangeListener;
     }
+
 }
