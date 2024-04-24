@@ -33,6 +33,8 @@ import androidx.annotation.NonNull;
 import androidx.appcompat.widget.AppCompatImageView;
 import androidx.core.view.ScaleGestureDetectorCompat;
 
+import com.jummania.enums.Alignment;
+import com.jummania.enums.AutoResetMode;
 import com.jummania.listener.AnimatorListener;
 import com.jummania.listener.OnBoundsChangeListener;
 import com.jummania.listener.OnGestureListener;
@@ -773,6 +775,16 @@ public class ZoomableImageView extends AppCompatImageView implements OnScaleGest
                 getParent().requestDisallowInterceptTouchEvent(disallowParentTouch());
             }
 
+            // Check if the touch event is either an ACTION_UP (finger lifted) or ACTION_CANCEL (touch canceled)
+            if (event.getActionMasked() == MotionEvent.ACTION_UP || event.getActionMasked() == MotionEvent.ACTION_CANCEL) {
+                // Notify the bounds change listener if it's not null
+                if (boundsChangeListener != null) {
+                    // Notify that the bounds alignment and off-screen percentage are reset
+                    boundsChangeListener.onBoundAlignmentChanged(Alignment.NO_ALIGNMENT, 0);
+                }
+            }
+
+
             // Update the previous pointer count for tracking finger changes
             previousPointerCount = currentPointerCount;
 
@@ -818,31 +830,30 @@ public class ZoomableImageView extends AppCompatImageView implements OnScaleGest
 
         if (boundsChangeListener != null) {
             // Calculate off-screen percentages for each aligned edge
-            float imageWidth = bounds.right - bounds.left;
-            float imageHeight = bounds.bottom - bounds.top;
 
-            float leftAlignedPercentage = leftAligned ? calculatePercentageOffScreen(bounds.left, imageWidth, screenWidth) : 0;
-            float rightAlignedPercentage = rightAligned ? calculatePercentageOffScreen(bounds.right, imageWidth, screenWidth) : 0;
-            float topAlignedPercentage = topAligned ? calculatePercentageOffScreen(bounds.top, imageHeight, screenHeight) : 0;
-            float bottomAlignedPercentage = bottomAligned ? calculatePercentageOffScreen(bounds.bottom, imageHeight, screenHeight) : 0;
+            float leftAlignedPercentage = leftAligned ? calculatePercentageOffScreenForLT(bounds.left, screenWidth) : 0;
+            float rightAlignedPercentage = rightAligned ? calculatePercentageOffScreenFromBR(bounds.right, screenWidth) : 0;
+            float topAlignedPercentage = topAligned ? calculatePercentageOffScreenForLT(bounds.top, screenHeight) : 0;
+            float bottomAlignedPercentage = bottomAligned ? calculatePercentageOffScreenFromBR(bounds.bottom, screenHeight) : 0;
 
             // Determine the maximum off-screen percentage and corresponding alignment
             float offScreenPercentage = Math.max(Math.max(leftAlignedPercentage, rightAlignedPercentage), Math.max(topAlignedPercentage, bottomAlignedPercentage));
 
-            Alignment alignment;
-            if (offScreenPercentage == leftAlignedPercentage) {
-                alignment = Alignment.LEFT;
-            } else if (offScreenPercentage == rightAlignedPercentage) {
-                alignment = Alignment.RIGHT;
-            } else if (offScreenPercentage == topAlignedPercentage) {
-                alignment = Alignment.TOP;
-            } else {
-                alignment = Alignment.BOTTOM;
+            Alignment alignment = Alignment.NO_ALIGNMENT;
+            if (offScreenPercentage != 0) {
+                if (offScreenPercentage == leftAlignedPercentage) {
+                    alignment = Alignment.LEFT;
+                } else if (offScreenPercentage == rightAlignedPercentage) {
+                    alignment = Alignment.RIGHT;
+                } else if (offScreenPercentage == topAlignedPercentage) {
+                    alignment = Alignment.TOP;
+                } else if (offScreenPercentage == bottomAlignedPercentage) {
+                    alignment = Alignment.BOTTOM;
+                }
             }
 
             // Notify listener of alignment changes and distance updates
             boundsChangeListener.onBoundAlignmentChanged(alignment, offScreenPercentage);
-            boundsChangeListener.onBoundDistanceChanged(bounds.left, screenWidth - bounds.right, bounds.top, screenHeight - bounds.bottom);
         }
 
         // Check if any edge of the image is aligned with the edge of the view
@@ -851,19 +862,36 @@ public class ZoomableImageView extends AppCompatImageView implements OnScaleGest
 
 
     /**
-     * Calculates the percentage by which a coordinate is off-screen relative to the image size and screen size.
+     * Calculates the percentage by which a coordinate is off-screen relative to the screen size.
+     * This method is used for left (L) or top (T) edges of an image.
      *
-     * @param coordinate The coordinate position of an image edge (left, right, top, or bottom).
-     * @param imageSize  The size of the image along the corresponding dimension (width or height).
+     * @param coordinate The coordinate position of an image edge (left or top).
      * @param screenSize The size of the screen along the corresponding dimension (width or height).
-     * @return The percentage by which the coordinate is off-screen, relative to the image size.
+     * @return The percentage by which the coordinate is off-screen, relative to the screen size.
      */
-    private float calculatePercentageOffScreen(float coordinate, float imageSize, float screenSize) {
-        // Calculate the absolute distance off the screen
-        float distanceOffScreen = Math.max(0, imageSize - screenSize + coordinate);
+    private float calculatePercentageOffScreenForLT(float coordinate, float screenSize) {
+        // Calculate the absolute distance from the boundary
+        float distanceFromBoundary = Math.abs(coordinate);
 
-        // Calculate the percentage relative to the image size
-        return (distanceOffScreen / imageSize) * 100;
+        // Calculate the percentage of movement away from the boundary
+        return (distanceFromBoundary / screenSize) * 100;
+    }
+
+
+    /**
+     * Calculates the percentage by which a coordinate is off-screen relative to the screen size.
+     * This method is used for right (R) or bottom (B) edges of an image.
+     *
+     * @param coordinate The coordinate position of an image edge (right or bottom).
+     * @param screenSize The size of the screen along the corresponding dimension (width or height).
+     * @return The percentage by which the coordinate is off-screen, relative to the screen size.
+     */
+    private float calculatePercentageOffScreenFromBR(float coordinate, float screenSize) {
+        // Calculate the distance from the boundary relative to the screen size
+        float distanceFromBoundary = Math.max(0, screenSize - coordinate);
+
+        // Calculate the percentage of movement away from the boundary
+        return (distanceFromBoundary / screenSize) * 100;
     }
 
 

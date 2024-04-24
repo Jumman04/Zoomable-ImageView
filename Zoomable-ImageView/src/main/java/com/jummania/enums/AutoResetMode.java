@@ -13,9 +13,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package com.jummania;
+package com.jummania.enums;
 
 import androidx.annotation.IntDef;
+
+import com.jummania.ZoomableImageView;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
